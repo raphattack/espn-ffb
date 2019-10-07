@@ -1,0 +1,10 @@
+*__pycache__/
+.idea/
+.vscode/
+.gradle/
+build/
+docker/data/
+venv/
+.DS_Store
+*.log
+.env

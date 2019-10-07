@@ -1,0 +1,16 @@
+*__pycache__/
+.idea/
+.vscode/
+.gradle/
+.git/
+build/
+docker/data/
+gradle/
+log/
+ospackage/
+sample/
+venv/
+
+.DS_Store
+*.log
+.env
