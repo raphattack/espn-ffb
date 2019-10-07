@@ -1,0 +1,55 @@
+{%- extends "base.html" -%}
+{% block nav_matchups %}active{% endblock %}
+{%- block content -%}
+  <form action="{{ url_for('matchup_history.show') }}" method="get">
+    <label>
+      Owner:
+      <select name="owner_id" onchange="this.form.submit()">
+        {%- for o in owners %}
+          {%- if o.owner_id != selected_opponent %}
+        <option value="{{ o.id }}" {%- if o.id == selected_owner %} selected {% endif %}>{{ o.first_name + " " + o.last_name }}</option>
+          {%- endif -%}
+        {%- endfor %}
+      </select>
+    </label>
+    <br><br>
+    <label>
+      Opponent:
+      <select name="opponent_owner_id" onchange="this.form.submit()">
+        {%- for o in owners %}
+          {%- if o.owner_id != selected_owner %}
+        <option value="{{ o.id }}" {%- if o.id == selected_opponent %} selected {% endif %}>{{ o.first_name + " " + o.last_name }}</option>
+          {%- endif -%}
+        {%- endfor %}
+      </select>
+    </label>
+    <label><input type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}>Regular Season</label>
+    <label><input type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}>Playoffs</label>
+  </form>
+  {%- if records|length > 0 %}
+  <div class="stats-table">
+    <table>
+      <tr>
+        {%- for th in table_headers %}
+        <th>{{ th }}</th>
+        {%- endfor %}
+      </tr>
+      {%- for r in records %}
+      <tr>
+        {%- for cn in column_names %}
+        {%- if cn == "is_win" %}
+          {%- if r[cn] %}
+        <td>W</td>
+          {%- else %}
+         <td>L</td>
+          {%- endif %}
+        {%- else %}
+        <td>{{ r[cn] }}</td>
+        {%- endif %}
+        {%- endfor %}
+      </tr>
+      {%- endfor %}
+    </table>
+  </div>
+  {%- endif %}
+{%- endblock -%}

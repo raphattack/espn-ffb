@@ -1,0 +1,13 @@
+        {#- {{ r.team }} = "team 1" -#}
+        {#- {{ r.opponent }} = "team 2" #}
+        <video class="img" playsinline autoplay muted loop>
+          <source src="{{ url_for('static', filename='images/recap/2018/2/cam-hit.webm') }}" type="video/webm">
+        </video>
+        <p>Cam Newton shook off a dirty helmet-to-helmet hit to throw for 335yd and 3td. His favorite receiver? Christian McCaffrey who hauled in 14 of 15 targets for 102yd.
+          {{ r.team }} reaped the benefits of both players, but was outdone with stellar performances by his opponent.
+          <br><br>
+          Matt Ryan led the way for {{ r.opponent }} with 2td through the air and another 2td <a href="https://gfycat.com/HelpfulMerryKinglet">risking his body</a> on the ground, good for 30.7 points.
+          Adam Thielen had his second straight game with over 100yd catching, finishing the afternoon with 12 receptions for 131yd <a href="https://streamable.com/06aos">and a td</a>.
+          <br><br>
+          Though {{ r.opponent }} gets a win propelling him to 2-0, he lost starting running back Joe Mixon for a few weeks. {{ r.team }} remains winless at 0-2.
+        </p>

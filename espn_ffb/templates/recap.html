@@ -1,0 +1,22 @@
+{%- extends "base.html" %}
+{% block recap_css %}<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/recap.css') }}"/>{% endblock %}
+{% block nav_recap %}active{% endblock %}
+{%- block content %}
+  <div>
+    <div class="column">
+      {%- for r in recaps %}
+      <div class="card">
+        <h2>
+          {{ r.team }} ({{ r.team_record.wins }}-{{ r.team_record.losses }})
+          <br>
+          vs.
+          <br>
+          {{ r.opponent }} ({{ r.opponent_record.wins }}-{{ r.opponent_record.losses }})
+        </h2>
+        <h5>All-time: ({{ r.h2h_record.wins }}-{{ r.h2h_record.losses }}), Win streak: {{ r.streak }} ({{ r.streak_owner }})</h5>
+        {%- include r.body %}
+      </div>
+      {%- endfor %}
+    </div>
+  </div>
+{%- endblock %}

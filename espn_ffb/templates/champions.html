@@ -1,0 +1,22 @@
+{%- extends "base.html" -%}
+{% block nav_champions %}active{% endblock %}
+{%- block content -%}
+  {%- if records|length > 0 %}
+  <div class="stats-table">
+    <table>
+      <tr>
+        {%- for th in table_headers %}
+        <th>{{ th }}</th>
+        {%- endfor %}
+      </tr>
+      {%- for r in records %}
+      <tr>
+        {%- for cn in column_names %}
+        <td>{{ r[cn] }}</td>
+        {%- endfor %}
+      </tr>
+      {%- endfor %}
+    </table>
+  </div>
+  {%- endif %}
+{%- endblock -%}

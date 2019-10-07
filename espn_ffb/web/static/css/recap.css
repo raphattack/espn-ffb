@@ -1,0 +1,25 @@
+body {
+  font-family: Arial, serif;
+  background: #f1f1f1;
+}
+
+h2, h5 {
+  text-align: center;
+}
+
+.column {
+  float: left;
+  width: 100%;
+}
+
+.img {
+  height: 40%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.card {
+  background-color: white;
+  padding: 20px;
+  margin-top: 20px;
+}

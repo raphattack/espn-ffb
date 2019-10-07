@@ -1,0 +1,11 @@
+[Unit]
+Description=Updates espn-ffb database
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=/opt/espn-ffb
+ExecStart=/usr/bin/python3 -m espn_ffb.db.update -e prod
+
+[Install]
+WantedBy=default.target

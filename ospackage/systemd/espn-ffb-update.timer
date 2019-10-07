@@ -1,0 +1,6 @@
+[Unit]
+Description=Run espn-ffb-update.service every Tuesday
+
+[Timer]
+OnCalendar=Tue 4..8:00
+AccuracySec=1us

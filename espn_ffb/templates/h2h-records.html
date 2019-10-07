@@ -1,0 +1,33 @@
+{%- extends "base.html" -%}
+{% block nav_h2h %}active{% endblock %}
+{%- block content %}
+  <form action="{{ url_for('h2h_records.show') }}" method="get">
+    <label>
+      <select name="owner_id" onchange="this.form.submit()">
+      {%- for o in owners %}
+        <option value="{{ o.id }}" {%- if o.id == selected_owner %} selected {% endif %}>{{o.first_name + " " + o.last_name }}</option>
+      {%- endfor %}
+      </select>
+    </label>
+    <label><input type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}>Regular Season</label>
+    <label><input type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}>Playoffs</label>
+  </form>
+  {%- if records|length > 0 %}
+  <div class="stats-table">
+    <table>
+      <tr>
+        {%- for th in table_headers %}
+        <th>{{ th }}</th>
+        {%- endfor %}
+      </tr>
+      {%- for r in records %}
+      <tr>
+        {%- for cn in column_names %}
+        <td>{{ r[cn] }}</td>
+        {%- endfor %}
+      </tr>
+      {%- endfor %}
+    </table>
+  </div>
+  {%- endif %}
+{%- endblock -%}
