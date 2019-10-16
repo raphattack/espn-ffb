@@ -1,46 +1,40 @@
-version: "3"
+version: "2"
 
 services:
-  web:
+  espn-ffb-web:
+    container_name: espn-ffb-web
+    depends_on:
+      - espn-ffb-db-test
     build:
       context: .
       args:
         APP_DIR: /opt/espn-ffb
         CONFIG_DIR: /etc/opt/espn-ffb
         LOG_BASE_DIR: /var/log/espn-ffb
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=espn-ffb-db
+      - POSTGRES_PORT=5432
     volumes:
       # Store web logs in a local host directory
       - ./docker/data/logs/web:/var/log/espn-ffb
       # Store web logs in a named Docker volume
       # - espn_ffb_logs:${LOG_BASE_DIR}
-    networks:
-      - espn-ffb
     ports:
       - 5000:5000
-    restart: on-failure
+    restart: unless-stopped
+  espn-ffb-db:
+    image: postgres:12-alpine
+    container_name: espn-ffb-db
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_HOST=db
-      - POSTGRES_PORT=5432
-    depends_on:
-      - db
-
-  db:
-    image: postgres:12-alpine
     volumes:
       # Store db data in a local host directory
       - ./docker/data/db:/var/lib/postgresql/data
       # Store db data in a named Docker volume
       # - espn_ffb_db:/var/lib/postgresql/data
-    networks:
-      - espn-ffb
-    restart: on-failure
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-
-networks:
-  espn-ffb:
+    restart: unless-stopped
