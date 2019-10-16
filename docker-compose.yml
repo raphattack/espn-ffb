@@ -1,10 +1,10 @@
 version: "2"
 
 services:
-  espn-ffb-web:
-    container_name: espn-ffb-web
+  espn-ffb:
+    container_name: espn-ffb
     depends_on:
-      - espn-ffb-db-test
+      - espn-ffb-db
     build:
       context: .
       args:
