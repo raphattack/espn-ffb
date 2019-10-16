@@ -57,12 +57,12 @@ Open browser to http://localhost:5000.
 ### Set up database
 To set up the database the first time, you can run the following command:
 ```bash
-docker-compose run web sh ./setup.sh
+docker-compose run espn-ffb sh ./setup.sh
 ```
 
 ### Update
 ```bash
-docker-compose run web sh ./update.sh
+docker-compose run espn-ffb sh ./update.sh
 ```
 
 If you are running with Docker, stop here.
