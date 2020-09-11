@@ -23,7 +23,6 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 ENV CONFIG_DIR=${CONFIG_DIR}
 COPY docker/scripts/* ./
 COPY conf/espn-ffb-docker.ini ${CONFIG_DIR}/espn-ffb.ini
-COPY espn_ffb espn_ffb
 
 EXPOSE 5000
 
