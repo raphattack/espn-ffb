@@ -13,7 +13,9 @@
       <button class="dropbtn">Standings<i class="fa fa-caret-down"></i></button>
       <div class="dropdown-content">
         <a href="{{ url_for('standings.show', year='overall') }}">Overall</a>
-        <a href="{{ url_for('standings.show', year=2019) }}">2019</a>
+        {%- for year in years %}
+          <a href="{{ url_for('standings.show', year=year) }}">{{ year }}</a>
+        {%- endfor %}
       </div>
     </div>
     <a href="{{ url_for('h2h_records.show') }}" class="{% block nav_h2h %}{% endblock %}">H2H Records</a>
