@@ -8,7 +8,14 @@
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
   </head>
   <div class="topnav" id="myTopnav">
-    <a href="{{ url_for('awards.show') }}" class="{% block nav_awards %}{% endblock %}">Awards</a>
+    <div class="dropdown {% block nav_awards %}{% endblock %}">
+      <button class="dropbtn">Awards<i class="fa fa-caret-down"></i></button>
+      <div class="dropdown-content">
+        {%- for year in years %}
+          <a href="{{ url_for('awards.show', year=year) }}">{{ year }}</a>
+        {%- endfor %}
+      </div>
+    </div>
     <div class="dropdown {% block nav_standings %}{% endblock %}">
       <button class="dropbtn">Standings<i class="fa fa-caret-down"></i></button>
       <div class="dropdown-content">
