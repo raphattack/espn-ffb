@@ -5,7 +5,7 @@ from espn_ffb.db.model.owners import Owners
 from espn_ffb.db.model.records import Records
 from espn_ffb.db.model.sackos import Sackos
 from espn_ffb.db.model.teams import Teams
-from sqlalchemy import desc
+from sqlalchemy import case, desc, func
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from typing import Sequence
 
@@ -62,60 +62,62 @@ class Query:
         COLUMN_NAMES = ['opponent_name', 'wins', 'losses']
         Record = namedtuple('H2HRecord', COLUMN_NAMES)
 
-        query = f"""
-        select
-          record.opponent_name as opponent_name,
-          sum(record.wins) as wins,
-          sum(record.losses) as losses
-        from
-          (
-            select
-              m.year,
-              m.matchup_id,
-              (
-                select
-                  concat_ws(' ', o.first_name, o.last_name)
-                from
-                  owners o
-                where
-                  o.id = m.owner_id
-              ) as owner_name,
-              m.owner_id,
-              (
-                select
-                  concat_ws(' ', o.first_name, o.last_name)
-                from
-                  owners o
-                where
-                  o.id = m.opponent_owner_id
-              ) as opponent_name,
-              m.opponent_owner_id,
-              case m.is_win when true then 1 else 0 end as wins,
-              case m.is_loss when true then 1 else 0 end as losses
-            from
-              matchups m
-            where
-              m.is_playoffs = {is_playoffs}
-              and not m.is_consolation
-              and m.owner_id = '{owner_id}'
-              and m.opponent_owner_id is not null
-            group by
-              m.year,
-              m.matchup_id,
-              owner_name,
-              m.owner_id,
-              opponent_name,
-              m.opponent_owner_id,
-              wins,
-              losses
-          ) as record
-        group by
-          record.opponent_name
-        order by
-          opponent_name
-        """
+        full_name_concat = func.CONCAT(Owners.first_name, ' ', Owners.last_name)
 
-        return [Record(**r) for r in self.db.engine.execute(query)]
+        owner_name = (
+          self.db.session.query(full_name_concat)
+          .filter(Owners.id == Matchups.owner_id)
+          .label("owner_name")
+        )
+
+        opponent_name = (
+          self.db.session.query(full_name_concat)
+          .filter(Owners.id == Matchups.opponent_owner_id)
+          .label("opponent_name")
+        )
+
+        wins = case([(Matchups.is_win.is_(True), 1)], else_=0).label("wins")
+
+        losses = case(
+          [(Matchups.is_loss.is_(True), 1)], else_=0
+        ).label("losses")
+
+        columns = [
+            Matchups.year,
+            Matchups.matchup_id,
+            owner_name,
+            Matchups.owner_id,
+            opponent_name,
+            Matchups.opponent_owner_id,
+            wins,
+            losses,
+        ]
+
+        record_subquery = (
+          self.db.session.query(*columns).filter_by(
+            owner_id=owner_id,
+            is_playoffs=is_playoffs,
+            is_pending=False,
+            is_consolation=False,
+          )
+          .filter(
+            Matchups.opponent_owner_id.isnot(None)
+          )
+          .group_by(*columns)
+          .subquery()
+        )
+
+        h2h_records_query = (
+          self.db.session.query(
+            record_subquery.c.opponent_name,
+            func.sum(record_subquery.c.wins).label("wins"),
+            func.sum(record_subquery.c.losses).label("losses"),
+          )
+          .group_by(record_subquery.c.opponent_name)
+          .order_by(record_subquery.c.opponent_name)
+        )
+
+        return [Record(*r) for r in h2h_records_query]
 
     def get_matchup_history(self, owner_id, opponent_owner_id, is_playoffs):
         matchups = self.db.session.query(Matchups) \
