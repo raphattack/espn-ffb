@@ -34,8 +34,8 @@ def update(query: Query, league_settings: Sequence[LeagueSetting], year: int):
     :param year: the current year
     :return: None
     """
-    update_matchups(query=query, league_settings=league_settings, year=year)
     update_records_and_teams(query=query, league_settings=league_settings, year=year)
+    update_matchups(query=query, league_settings=league_settings, year=year)
 
 
 def update_matchups(query: Query, league_settings: Sequence[LeagueSetting], year: int):
@@ -83,8 +83,8 @@ def update_records_and_teams(query: Query, league_settings: Sequence[LeagueSetti
     teams = set(t for t in query.get_teams(year=year))
     current_records, current_teams = get_current_records_and_teams(league_settings=league_settings)
 
-    update_records(query=query, current_records=current_records, records=records)
     update_teams(query=query, current_teams=current_teams, teams=teams)
+    update_records(query=query, current_records=current_records, records=records)
 
 
 def get_current_records_and_teams(league_settings: Sequence[LeagueSetting]) -> (Set[Records], Set[Teams]):
