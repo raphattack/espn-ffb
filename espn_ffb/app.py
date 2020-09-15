@@ -42,6 +42,11 @@ def number_format(value):
     return "{:,}".format(value)
 
 
+@app.context_processor
+def get_years():
+    return dict(years=query.get_distinct_years())
+
+
 @app.before_first_request
 def setup_logging():
     if not app.debug:

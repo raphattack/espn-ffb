@@ -309,6 +309,15 @@ class Query:
 
         return win_streaks
 
+    def get_distinct_years(self):
+      distinct_matchup_years = (
+        self.db.session.query(Matchups.year)
+        .distinct(Matchups.year)
+        .order_by(Matchups.year.desc())
+      )
+
+      return [matchup.year for matchup in distinct_matchup_years]
+
     def upsert_matchups(self, matchups):
         for m in matchups:
             statement = pg_insert(Matchups) \
