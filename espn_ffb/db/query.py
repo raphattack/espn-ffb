@@ -7,7 +7,7 @@ from espn_ffb.db.model.sackos import Sackos
 from espn_ffb.db.model.teams import Teams
 from sqlalchemy import case, desc, func
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from typing import Sequence
+from typing import Optional, Sequence
 
 
 class Query:
@@ -146,15 +146,17 @@ class Query:
     def get_owners(self):
         return self.db.session.query(Owners).all()
 
-    def get_records(self, year: int) -> Sequence[Records]:
+    def get_records(self, year: Optional[int]) -> Sequence[Records]:
         """
-        Select records for a given year.
+        Select records for a given year or all years if year is None.
 
         :param year: the year
         :return: list of records
         """
-        records = self.db.session.query(Records).filter_by(year=year).all()
-        return records
+        records_query = self.db.session.query(Records)
+        if year:
+          records_query = records_query.filter_by(year=year)
+        return records_query.all()
 
     def get_sacko_current(self):
         sacko = self.db.session.query(Sackos) \
@@ -162,98 +164,78 @@ class Query:
             .first()
         return sacko
 
-    def get_standings(self, year: int):
-        COLUMN_NAMES = ["owner_id", "wins", "losses", "win_percentage", "points_for", "points_against", "avg_points_for",
-                        "avg_points_against", "championships", "sackos"]
+    def get_standings(self, year=None):
+        COLUMN_NAMES = [
+          "owner_id",
+          "wins",
+          "losses",
+          "win_percentage",
+          "points_for",
+          "points_against",
+          "avg_points_for",
+          "avg_points_against",
+          "championships",
+          "sackos",
+        ]
         Record = namedtuple('Standings', COLUMN_NAMES)
 
-        query = f"""
-        select 
-          r.owner_id as owner_id,
-          r.wins as wins,
-          r.losses as losses,
-          case 
-            when (r.wins + r.losses) = 0 
-              then 0 
-            else 
-              round(r.wins::decimal/(r.wins + r.losses) , 4) 
-          end as win_percentage,
-          r.points_for as points_for,
-          r.points_against as points_against,
-          case 
-            when (r.wins + r.losses) = 0 
-              then 0 
-            else 
-              round(r.points_for/(r.wins + r.losses), 2) 
-          end as avg_points_for,
-          case 
-            when (r.wins + r.losses) = 0 
-              then 0 
-            else 
-              round(r.points_against/(r.wins + r.losses), 2) 
-          end as avg_points_against,
-          (select count(1) from champions where owner_id = r.owner_id and year = r.year) as championships,
-          (select count(1) from sackos where owner_id = r.owner_id and year = r.year) as sackos
-        from 
-          records r
-        where 
-          r.year = {year}
-        group by
-          r.year,
-          r.owner_id,
-          r.wins,
-          r.losses,
-          r.points_for,
-          r.points_against
-        order by
-          win_percentage desc,
-          points_for desc
-        """
+        owners = self.get_owners()
+        records = self.get_records(year=year)
 
-        return [Record(**r) for r in self.db.engine.execute(query)]
+        standings = []
+        for owner in owners:
+          owners_records = [r for r in records if r.owner_id == owner.id]
+          # Skip owner without records. Common when viewing standings for a
+          # year where an owner did not participate.
+          if not owners_records:
+            continue
 
-    def get_standings_overall(self):
-        COLUMN_NAMES = ["owner_id", "wins", "losses", "win_percentage", "points_for", "points_against", "avg_points_for",
-                        "avg_points_against", "championships", "sackos"]
-        Record = namedtuple('Standings', COLUMN_NAMES)
+          wins = sum(r.wins for r in owners_records)
+          losses = sum(r.losses for r in owners_records)
+          ties = sum(r.ties for r in owners_records)
+          total_games = wins + losses + ties
 
-        query = f"""
-        select
-          r.owner_id as owner_id,
-          sum(r.wins) as wins,
-          sum(r.losses) as losses,
-          case 
-            when (sum(r.wins) + sum(r.losses)) = 0 
-              then 0 
-            else 
-              round(sum(r.wins)::decimal/(sum(r.wins) + sum(r.losses)) , 4) 
-          end as win_percentage,
-          sum(r.points_for) as points_for,
-          sum(r.points_against) as points_against,
-          case 
-            when (sum(r.wins) + sum(r.losses)) = 0 
-              then 0 
-            else 
-              round(sum(r.points_for)/(sum(r.wins) + sum(r.losses)), 2) 
-          end as avg_points_for,
-          case 
-            when (sum(r.wins) + sum(r.losses)) = 0 
-              then 0 
-            else 
-              round(sum(r.points_against)/(sum(r.wins) + sum(r.losses)), 2) 
-          end as avg_points_against,
-          (select count(1) from champions where owner_id = r.owner_id) as championships,
-          (select count(1) from sackos where owner_id = r.owner_id) as sackos
-        from
-          records r
-        group by
-          r.owner_id
-        order by
-          win_percentage desc,
-          avg_points_for desc
-        """
+          points_for = sum(r.points_for for r in owners_records)
+          points_against = sum(r.points_against for r in owners_records)
 
-        return [Record(**r) for r in self.db.engine.execute(query)]
+          avg_points_for = float(0)
+          avg_points_against = float(0)
+          win_percentage = float(0)
+          if total_games > 0:
+            win_percentage = float(f"{wins / total_games:.4f}")
+            avg_points_for = float(f"{points_for / total_games:.2f}")
+            avg_points_against = float(f"{points_against / total_games:.2f}")
+
+          sackos_query = self.db.session.query(Sackos).filter_by(
+            owner_id=owner.id
+          )
+          champions_query = self.db.session.query(Champions).filter_by(
+            owner_id=owner.id
+          )
+          if year:
+            sackos_query = sackos_query.filter_by(year=year)
+            champions_query = champions_query.filter_by(year=year)
+
+          standings.append(
+            Record(
+              owner.id,
+              wins,
+              losses,
+              win_percentage,
+              points_for,
+              points_against,
+              avg_points_for,
+              avg_points_against,
+              champions_query.count(),
+              sackos_query.count(),
+            )
+          )
+
+        standings.sort(
+          key=lambda x: (x.win_percentage, x.points_for), reverse=True
+        )
+
+        return standings
 
     def get_team_id_to_record(self, year, week):
         team_id_to_record = dict()

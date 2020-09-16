@@ -20,7 +20,7 @@ def show(year: str):
     sacko = query.get_sacko_current()
 
     if year == "overall":
-        records = query.get_standings_overall()
+        records = query.get_standings()
     else:
         records = query.get_standings(year=int(year))
 
