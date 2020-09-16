@@ -1,4 +1,3 @@
-from collections import namedtuple
 from espn_ffb.db.model.champions import Champions
 from espn_ffb.db.model.matchups import Matchups
 from espn_ffb.db.model.owners import Owners
@@ -7,7 +6,36 @@ from espn_ffb.db.model.sackos import Sackos
 from espn_ffb.db.model.teams import Teams
 from sqlalchemy import case, desc, func
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from typing import Optional, Sequence
+from typing import Dict, List, NamedTuple, Optional, Set, Sequence
+
+
+class H2HRecord(NamedTuple):
+  opponent_name: str
+  wins: int
+  losses: int
+
+
+class StandingsRecord(NamedTuple):
+  owner_id: int
+  wins: int
+  losses: int
+  win_percentage: float
+  points_for: float
+  points_against: float
+  avg_points_for: float
+  avg_points_against: float
+  championships: float
+  sackos: float
+
+
+class WinLossRecord(NamedTuple):
+  wins: int
+  losses: int
+
+
+class WinStreakRecord(NamedTuple):
+  streak: int
+  streak_owner: Optional[int]
 
 
 class Query:
@@ -27,7 +55,7 @@ class Query:
 
         return champions
 
-    def get_distinct_matchup_team_ids(self, year: int):
+    def get_distinct_matchup_team_ids(self, year: int) -> Dict[str, Set[int]]:
         distinct_matchup_team_ids = dict()
         matchups = self.get_matchups(year)
         for matchup in matchups:
@@ -35,13 +63,14 @@ class Query:
                 distinct_matchup_team_ids[matchup.matchup_id] = {matchup.team_id}
             else:
                 if (matchup.opponent_team_id is None) or (
-                        matchup.opponent_team_id not in distinct_matchup_team_ids.get(matchup.matchup_id)):
+                        matchup.opponent_team_id not in distinct_matchup_team_ids[matchup.matchup_id]):
                     distinct_matchup_team_ids[matchup.matchup_id].add(matchup.team_id)
 
         return distinct_matchup_team_ids
 
-    def get_h2h_record_current(self, matchups, year, week):
-        Record = namedtuple('Record', ['wins', 'losses'])
+    def get_h2h_record_current(
+      self, matchups: Sequence[Matchups], year: int, week: int
+    ) -> List[WinLossRecord]:
         h2h_record = list()
         for m in matchups:
             wins, losses = 0, 0
@@ -54,14 +83,13 @@ class Query:
                 else:
                     losses += 1
 
-            h2h_record.append(Record(wins, losses))
+            h2h_record.append(WinLossRecord(wins, losses))
 
         return h2h_record
 
-    def get_h2h_records(self, owner_id, is_playoffs):
-        COLUMN_NAMES = ['opponent_name', 'wins', 'losses']
-        Record = namedtuple('H2HRecord', COLUMN_NAMES)
-
+    def get_h2h_records(
+      self, owner_id: int, is_playoffs: bool
+    ) -> List[H2HRecord]:
         full_name_concat = func.CONCAT(Owners.first_name, ' ', Owners.last_name)
 
         owner_name = (
@@ -117,7 +145,7 @@ class Query:
           .order_by(record_subquery.c.opponent_name)
         )
 
-        return [Record(*r) for r in h2h_records_query]
+        return [H2HRecord(*r) for r in h2h_records_query]
 
     def get_matchup_history(self, owner_id, opponent_owner_id, is_playoffs):
         matchups = self.db.session.query(Matchups) \
@@ -164,21 +192,9 @@ class Query:
             .first()
         return sacko
 
-    def get_standings(self, year=None):
-        COLUMN_NAMES = [
-          "owner_id",
-          "wins",
-          "losses",
-          "win_percentage",
-          "points_for",
-          "points_against",
-          "avg_points_for",
-          "avg_points_against",
-          "championships",
-          "sackos",
-        ]
-        Record = namedtuple('Standings', COLUMN_NAMES)
-
+    def get_standings(
+      self, year: Optional[int] = None
+    ) -> List[StandingsRecord]:
         owners = self.get_owners()
         records = self.get_records(year=year)
 
@@ -217,7 +233,7 @@ class Query:
             champions_query = champions_query.filter_by(year=year)
 
           standings.append(
-            Record(
+            StandingsRecord(
               owner.id,
               wins,
               losses,
@@ -237,22 +253,27 @@ class Query:
 
         return standings
 
-    def get_team_id_to_record(self, year, week):
-        team_id_to_record = dict()
-        Record = namedtuple('Record', ['wins', 'losses'])
+    def get_team_id_to_record(
+      self, year: int, week: int
+    ) -> Dict[str, WinLossRecord]:
+        team_id_to_record: Dict[str, WinLossRecord] = dict()
         matchups = self.get_matchups(year)
         for m in matchups:
             if m.team_id in team_id_to_record:
-                r = team_id_to_record.get(m.team_id)
+                r = team_id_to_record[m.team_id]
             else:
-                r = Record(0, 0)
+                r = WinLossRecord(0, 0)
                 team_id_to_record[m.team_id] = r
 
             if m.matchup_id < week:
                 if m.team_score > m.opponent_team_score:
-                    team_id_to_record[m.team_id] = Record(r.wins + 1, r.losses)
+                    team_id_to_record[m.team_id] = WinLossRecord(
+                      r.wins + 1, r.losses
+                    )
                 if m.team_score < m.opponent_team_score:
-                    team_id_to_record[m.team_id] = Record(r.wins, r.losses + 1)
+                    team_id_to_record[m.team_id] = WinLossRecord(
+                      r.wins, r.losses + 1
+                    )
 
         return team_id_to_record
 
@@ -270,10 +291,10 @@ class Query:
         teams = self.db.session.query(Teams).filter_by(year=year).all()
         return teams
 
-    def get_win_streak_by_year(self, matchups, year, week):
+    def get_win_streak_by_year(
+      self, matchups: Sequence[Matchups], year: int, week: int
+    ) -> List[WinStreakRecord]:
         win_streaks = list()
-        WinStreak = namedtuple('WinStreak', ['streak', 'streak_owner'])
-
         for m in matchups:
             streak, streak_owner, streak_type = 0, None, None
             h2h_history = [h2h for h2h in self.get_matchup_history(m.owner_id, m.opponent_owner_id, False) if
@@ -289,7 +310,7 @@ class Query:
                     break
 
                 streak += 1
-            win_streaks.append(WinStreak(streak, streak_owner))
+            win_streaks.append(WinStreakRecord(streak, streak_owner))
 
         return win_streaks
 
