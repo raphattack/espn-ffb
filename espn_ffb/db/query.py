@@ -19,6 +19,7 @@ class StandingsRecord(NamedTuple):
   owner_id: int
   wins: int
   losses: int
+  ties: int
   win_percentage: float
   points_for: float
   points_against: float
@@ -237,6 +238,7 @@ class Query:
               owner.id,
               wins,
               losses,
+              ties,
               win_percentage,
               points_for,
               points_against,
