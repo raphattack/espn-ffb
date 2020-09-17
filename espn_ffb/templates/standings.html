@@ -17,8 +17,10 @@
         {%- for cn in column_names %}
         {%- if cn == "owner_id" %}
         <td>{{ owner_id_to_name.get(r[cn]) }}</td>
+        {%- elif cn == "win_percentage" %}
+        <td>{{ r[cn] | percentage_format }}</td>
         {%- elif cn == "points_for" or cn == "points_against" %}
-        <td>{{ r[cn] | number_format }}</td>
+        <td>{{ r[cn] | points_format }}</td>
         {%- elif cn == "championships" %}
         <td>
           {%- for c in range(0, r[cn]) %}

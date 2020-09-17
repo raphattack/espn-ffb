@@ -38,8 +38,13 @@ app.config['QUERY'] = query
 
 
 @app.template_filter()
-def number_format(value):
+def points_format(value):
     return "{:,}".format(value)
+
+
+@app.template_filter()
+def percentage_format(value):
+    return "{:.4f}".format(value)
 
 
 @app.context_processor
