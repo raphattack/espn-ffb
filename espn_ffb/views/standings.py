@@ -1,9 +1,9 @@
 from flask import Blueprint, current_app, render_template
 
 standings = Blueprint("standings", __name__, template_folder="templates")
-TABLE_HEADERS = ["Name", "Wins", "Losses", "Win Percentage", "Points For", "Points Against", "Average Points For",
+TABLE_HEADERS = ["Name", "Wins", "Losses", "Ties", "Win Percentage", "Points For", "Points Against", "Average Points For",
                  "Average Points Against", "Championships", "Sackos"]
-COLUMN_NAMES = ["owner_id", "wins", "losses", "win_percentage", "points_for", "points_against", "avg_points_for",
+COLUMN_NAMES = ["owner_id", "wins", "losses", "ties", "win_percentage", "points_for", "points_against", "avg_points_for",
                 "avg_points_against", "championships", "sackos"]
 
 
@@ -20,7 +20,7 @@ def show(year: str):
     sacko = query.get_sacko_current()
 
     if year == "overall":
-        records = query.get_standings_overall()
+        records = query.get_standings()
     else:
         records = query.get_standings(year=int(year))
 
