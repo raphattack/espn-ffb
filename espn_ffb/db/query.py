@@ -250,7 +250,7 @@ class Query:
           )
 
         standings.sort(
-          key=lambda x: (x.win_percentage, x.points_for), reverse=True
+          key=lambda x: (x.win_percentage, x.avg_points_for), reverse=True
         )
 
         return standings
