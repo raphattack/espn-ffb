@@ -2,7 +2,9 @@
 
 espn-ffb is a project to query fantasy football data from ESPN's API and persist it in your own database. There is a very basic web component with a few views built using Flask that allows you to self-host your own fantasy football league page.
 
-Until all [raw SQL is converted to ORM](https://github.com/raphattack/espn-ffb/issues/1), this will only work with PostgreSQL, but you can modify the queries in [query.py](espn_ffb/db/query.py) to work with other databases supported by [SQLAlchemy](https://docs.sqlalchemy.org/en/13/core/engines.html).
+It should work with any databases supported by [SQLAlchemy](https://docs.sqlalchemy.org/en/13/dialects/index.html). You can change [config.py](https://github.com/raphattack/espn-ffb/blob/master/espn_ffb/config.py#L4-L7) to your respective database URI.
+
+I have only tested with Postgres and the Docker image will also only work with Postgres.
 
 #### Sample views:
 - Recap - [desktop](sample/images/recap-desktop.png), [mobile](sample/images/recap-mobile.png)
@@ -15,7 +17,7 @@ Until all [raw SQL is converted to ORM](https://github.com/raphattack/espn-ffb/i
 
 Two modes are supported:
 * Run with Docker (easiest)
-* Run locally (requires PostgreSQL instance)
+* Run locally (requires database instance)
 
 # Pre-requisites:
 
