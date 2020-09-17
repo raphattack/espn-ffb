@@ -13,7 +13,7 @@ def show():
     matchup_type = request.args.get('matchup_type', default=util.REGULAR_SEASON)
     owner_id = request.args.get('owner_id', type=str)
 
-    owners = query.get_owners()
+    owners = query.get_owners(exclude=True)
     is_playoffs = util.get_is_playoffs(matchup_type)
 
     if not owner_id:

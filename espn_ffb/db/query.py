@@ -9,34 +9,40 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from typing import Dict, List, NamedTuple, Optional, Set, Sequence
 
 
+# exclude specific owners
+exclude_owners = {
+    "{some_owner_id}"
+}
+
+
 class H2HRecord(NamedTuple):
-  opponent_name: str
-  wins: int
-  losses: int
+    opponent_name: str
+    wins: int
+    losses: int
 
 
 class StandingsRecord(NamedTuple):
-  owner_id: int
-  wins: int
-  losses: int
-  ties: int
-  win_percentage: float
-  points_for: float
-  points_against: float
-  avg_points_for: float
-  avg_points_against: float
-  championships: float
-  sackos: float
+    owner_id: int
+    wins: int
+    losses: int
+    ties: int
+    win_percentage: float
+    points_for: float
+    points_against: float
+    avg_points_for: float
+    avg_points_against: float
+    championships: float
+    sackos: float
 
 
 class WinLossRecord(NamedTuple):
-  wins: int
-  losses: int
+    wins: int
+    losses: int
 
 
 class WinStreakRecord(NamedTuple):
-  streak: int
-  streak_owner: Optional[int]
+    streak: int
+    streak_owner: Optional[int]
 
 
 class Query:
@@ -123,7 +129,8 @@ class Query:
                 is_consolation=False,
             )
             .filter(
-                Matchups.opponent_owner_id.isnot(None)
+                Matchups.opponent_owner_id.isnot(None),
+                Matchups.opponent_owner_id.notin_(exclude_owners)
             )
             .group_by(*columns)
             .subquery()
@@ -165,7 +172,9 @@ class Query:
             .all()
         return matchups
 
-    def get_owners(self):
+    def get_owners(self, exclude: bool = False):
+        if exclude:
+            return self.db.session.query(Owners).filter(Owners.id.notin_(exclude_owners))
         return self.db.session.query(Owners).all()
 
     def get_records(self, year: Optional[int]) -> Sequence[Records]:
@@ -192,6 +201,10 @@ class Query:
 
         standings = []
         for owner in owners:
+            if not year:
+                if owner.id in exclude_owners:
+                    continue
+
             owners_records = [r for r in records if r.owner_id == owner.id]
             # Skip owner without records. Common when viewing standings for a
             # year where an owner did not participate.
