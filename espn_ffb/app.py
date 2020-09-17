@@ -64,7 +64,8 @@ def setup_logging():
 
 @app.route('/', methods=['GET'])
 def show_index():
-    return redirect("/awards", code=302)
+    current_year = query.get_distinct_years()[0]
+    return redirect(f"/awards/{current_year}", code=302)
 
 
 if __name__ == "__main__":
