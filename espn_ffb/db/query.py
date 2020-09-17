@@ -189,13 +189,26 @@ class Query:
             records_query = records_query.filter_by(year=year)
         return records_query.all()
 
+    def get_playoff_matchups(self, year: Optional[int]) -> Sequence[Matchups]:
+        playoff_matchups = self.db.session.query(Matchups)
+        if year:
+            playoff_matchups = playoff_matchups.filter_by(year=year)
+        return playoff_matchups.filter(
+            Matchups.opponent_owner_id.isnot(None),
+            Matchups.is_playoffs.is_(True)).all()
+    
     def get_sacko_current(self):
         sacko = self.db.session.query(Sackos) \
             .order_by(desc(Sackos.year)) \
             .first()
         return sacko
 
-    def get_standings(self, year: Optional[int] = None) -> List[StandingsRecord]:
+    def get_standings(self, year: Optional[int] = None, is_playoffs: bool = False) -> List[StandingsRecord]:
+        if is_playoffs:
+            return self.get_playoff_standings(year=year)
+        return self.get_regular_standings(year=year)
+
+    def get_regular_standings(self, year: Optional[int]) -> List[StandingsRecord]:
         owners = self.get_owners()
         records = self.get_records(year=year)
 
@@ -218,6 +231,64 @@ class Query:
 
             points_for = sum(r.points_for for r in owners_records)
             points_against = sum(r.points_against for r in owners_records)
+
+            avg_points_for = float(0)
+            avg_points_against = float(0)
+            win_percentage = float(0)
+            if total_games > 0:
+                win_percentage = float(f"{wins / total_games:.4f}")
+                avg_points_for = float(f"{points_for / total_games:.2f}")
+                avg_points_against = float(f"{points_against / total_games:.2f}")
+
+            sackos_query = self.db.session.query(Sackos).filter_by(owner_id=owner.id)
+            champions_query = self.db.session.query(Champions).filter_by(owner_id=owner.id)
+            if year:
+                sackos_query = sackos_query.filter_by(year=year)
+                champions_query = champions_query.filter_by(year=year)
+
+            standings.append(
+                StandingsRecord(
+                    owner.id,
+                    wins,
+                    losses,
+                    ties,
+                    win_percentage,
+                    points_for,
+                    points_against,
+                    avg_points_for,
+                    avg_points_against,
+                    champions_query.count(),
+                    sackos_query.count(),
+                )
+            )
+
+        standings.sort(key=lambda x: (x.win_percentage, x.avg_points_for), reverse=True)
+
+        return standings
+
+    def get_playoff_standings(self, year: Optional[int]) -> List[StandingsRecord]:
+        owners = self.get_owners()
+        matchups = self.get_playoff_matchups(year=year)
+
+        standings = list()
+        for owner in owners:
+            if not year:
+                if owner.id in exclude_owners:
+                    continue
+
+            owner_matchups = [m for m in matchups if m.owner_id == owner.id]
+            # Skip owner without records. Common when viewing standings for a
+            # year where an owner did not participate.
+            if not owner_matchups:
+                continue
+
+            wins = sum(m.is_win for m in owner_matchups)
+            losses = sum(m.is_loss for m in owner_matchups)
+            ties = sum(1 if m.team_score == m.opponent_team_score else 0 for m in owner_matchups)
+            total_games = wins + losses + ties
+
+            points_for = sum(m.team_score for m in owner_matchups)
+            points_against = sum(m.opponent_team_score for m in owner_matchups)
 
             avg_points_for = float(0)
             avg_points_against = float(0)
