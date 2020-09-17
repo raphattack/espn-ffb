@@ -336,13 +336,9 @@ class Query:
 
             if m.matchup_id < week:
                 if m.team_score > m.opponent_team_score:
-                    team_id_to_record[m.team_id] = WinLossRecord(
-                      r.wins + 1, r.losses
-                    )
+                    team_id_to_record[m.team_id] = WinLossRecord(r.wins + 1, r.losses)
                 if m.team_score < m.opponent_team_score:
-                    team_id_to_record[m.team_id] = WinLossRecord(
-                      r.wins, r.losses + 1
-                    )
+                    team_id_to_record[m.team_id] = WinLossRecord(r.wins, r.losses + 1)
 
         return team_id_to_record
 
@@ -384,9 +380,9 @@ class Query:
 
     def get_distinct_years(self):
         distinct_matchup_years = (
-              self.db.session.query(Matchups.year)
-                  .distinct(Matchups.year)
-                  .order_by(Matchups.year.desc())
+            self.db.session.query(Matchups.year)
+                .distinct(Matchups.year)
+                .order_by(Matchups.year.desc())
         )
 
         return [matchup.year for matchup in distinct_matchup_years]
