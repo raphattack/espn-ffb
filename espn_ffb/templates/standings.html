@@ -1,6 +1,10 @@
 {%- extends "base.html" -%}
 {% block nav_standings %}active{% endblock %}
 {%- block content -%}
+  <form action="{{ url_for('standings.show', year=year) }}" method="get">
+    <label><input type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}>Regular Season</label>
+    <label><input type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}>Playoffs</label>
+  </form>
   {%- if records|length > 0 %}
   <div class="stats-table">
     <table>
