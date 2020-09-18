@@ -34,7 +34,7 @@
         <button class="dropbtn">Recap<i class="fa fa-caret-down"></i></button>
         <div class="dropdown-content">
           {%- for year_month in recap_templates_year_weeks %}
-            <a href="{{ url_for('recap.show', year=year_month[0], week=year_month[1]) }}">{{ year_month[0] }}, Week {{ year_month[1] }}</a>
+            <a href="{{ url_for('recap.show', year=year_month[0], week=year_month[1]) }}">{{ year_month[0] }}, Week {{ '%02d' % year_month[1] }}</a>
           {%- endfor %}
         </div>
       </div>

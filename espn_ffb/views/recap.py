@@ -4,7 +4,7 @@ from espn_ffb import util
 recap = Blueprint("recap", __name__, template_folder="templates")
 
 
-@recap.route('/recap/<int:year>/<int:week>', methods=['GET'])
+@recap.route('/recap/<int:year>/<int(fixed_digits=2):week>', methods=['GET'])
 def show(year, week):
     query = current_app.config.get("QUERY")
 
@@ -29,7 +29,7 @@ def show(year, week):
                 streak=ws.streak,
                 streak_owner=streak_owner,
                 h2h_record=h2h_record,
-                body=f"recap/{year}/{week}/{m.team_id}.html"
+                body=f"recap/{year}/{week:02d}/{m.team_id}.html"
             )
         )
     return render_template("recap.html", title='Weekly Recap', recaps=recaps)
