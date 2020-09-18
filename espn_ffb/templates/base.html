@@ -8,14 +8,16 @@
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
   </head>
   <div class="topnav" id="myTopnav">
-    <div class="dropdown {% block nav_awards %}{% endblock %}">
-      <button class="dropbtn">Awards<i class="fa fa-caret-down"></i></button>
-      <div class="dropdown-content">
-        {%- for year in years %}
-          <a href="{{ url_for('awards.show', year=year) }}">{{ year }}</a>
-        {%- endfor %}
+    {%- if awards_templates_years %}
+      <div class="dropdown {% block nav_awards %}{% endblock %}">
+        <button class="dropbtn">Awards<i class="fa fa-caret-down"></i></button>
+        <div class="dropdown-content">
+          {%- for year in awards_templates_years %}
+            <a href="{{ url_for('awards.show', year=year) }}">{{ year }}</a>
+          {%- endfor %}
+        </div>
       </div>
-    </div>
+    {%- endif %}
     <div class="dropdown {% block nav_standings %}{% endblock %}">
       <button class="dropbtn">Standings<i class="fa fa-caret-down"></i></button>
       <div class="dropdown-content">
@@ -27,19 +29,27 @@
     </div>
     <a href="{{ url_for('h2h_records.show') }}" class="{% block nav_h2h %}{% endblock %}">H2H Records</a>
     <a href="{{ url_for('matchup_history.show') }}" class="{% block nav_matchups %}{% endblock %}">Matchup History</a>
-    <div class="dropdown {% block nav_recap %}{% endblock %}">
-      <button class="dropbtn">Recap<i class="fa fa-caret-down"></i></button>
-      <div class="dropdown-content">
-        <a href="{{ url_for('recap.show', year=2018, week=2) }}">2018, Week 2</a>
+    {%- if recap_templates_year_weeks %}
+      <div class="dropdown {% block nav_recap %}{% endblock %}">
+        <button class="dropbtn">Recap<i class="fa fa-caret-down"></i></button>
+        <div class="dropdown-content">
+          {%- for year_month in recap_templates_year_weeks %}
+            <a href="{{ url_for('recap.show', year=year_month[0], week=year_month[1]) }}">{{ year_month[0] }}, Week {{ year_month[1] }}</a>
+          {%- endfor %}
+        </div>
       </div>
-    </div>
+    {%- endif %}
     <a href="{{ url_for('champions.show') }}" class="{% block nav_champions %}{% endblock %}">Champions</a>
-    <div class="dropdown {% block nav_playoffs %}{% endblock %}">
-      <button class="dropbtn">Playoffs<i class="fa fa-caret-down"></i></button>
-      <div class="dropdown-content">
-        <a href="{{ url_for('playoffs.show', year=2018) }}">2018</a>
+    {%- if playoffs_templates_years %}
+      <div class="dropdown {% block nav_playoffs %}{% endblock %}">
+        <button class="dropbtn">Playoffs<i class="fa fa-caret-down"></i></button>
+        <div class="dropdown-content">
+          {%- for year in playoffs_templates_years %}
+            <a href="{{ url_for('playoffs.show', year=year) }}">{{ year }}</a>
+          {%- endfor %}
+        </div>
       </div>
-    </div>
+    {%- endif %}
     <a href="javascript:void(0);" style="font-size:15px;" class="icon" onclick="myFunction()">&#9776;</a>
   </div>
   {%- block content %}{% endblock %}
