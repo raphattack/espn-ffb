@@ -50,6 +50,7 @@ def percentage_format(value):
 
 def get_template_path_vars_for_nav(relative_path, pattern, splitter=None):
     matching_paths = glob.glob(relative_path + pattern)
+    matching_paths.sort(reverse=True)
 
     def remove_prefix(text, prefix=relative_path):
         return text[text.startswith(prefix) and len(prefix):]
