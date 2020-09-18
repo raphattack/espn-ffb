@@ -12,7 +12,7 @@
       <div class="dropdown {% block nav_awards %}{% endblock %}">
         <button class="dropbtn">Awards<i class="fa fa-caret-down"></i></button>
         <div class="dropdown-content">
-          {%- for year in awards_template_years %}
+          {%- for year in awards_templates_years %}
             <a href="{{ url_for('awards.show', year=year) }}">{{ year }}</a>
           {%- endfor %}
         </div>
@@ -44,7 +44,7 @@
       <div class="dropdown {% block nav_playoffs %}{% endblock %}">
         <button class="dropbtn">Playoffs<i class="fa fa-caret-down"></i></button>
         <div class="dropdown-content">
-          {%- for year in playoffs_template_years %}
+          {%- for year in playoffs_templates_years %}
             <a href="{{ url_for('playoffs.show', year=year) }}">{{ year }}</a>
           {%- endfor %}
         </div>
