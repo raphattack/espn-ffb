@@ -32,7 +32,7 @@ def parse_args():
 
 
 def get_filename(year, week, team_id):
-    template_dir = RECAP_TEMPLATE_DIR.format(year=year, week=week)
+    template_dir = RECAP_TEMPLATE_DIR.format(year=year, week=f"{week:02d}")
     os.makedirs(template_dir, exist_ok=True)
     return os.path.join(template_dir, str(team_id) + HTML_EXTENSION)
 
