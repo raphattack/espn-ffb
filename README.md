@@ -42,6 +42,15 @@ To find your `swid` and `espn_s2` in Chrome, go to **DevTools > Application > Co
 
 # Run with Docker
 
+### Windows Users
+There is a [known issue](https://forums.docker.com/t/data-directory-var-lib-postgresql-data-pgdata-has-wrong-ownership/17963/31) with mounted volumes on Docker Desktop, so there are a couple additional steps to take.
+
+1. Rename `docker-compose.yml.windows` to `docker-compose.yml`.
+2. Create the docker volume **pgdata**.
+   ```bash
+   docker volume create --name=pgdata
+   ```
+
 ### Set up .env file
 ```bash
 cp .env.sample .env
