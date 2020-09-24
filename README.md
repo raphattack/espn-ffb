@@ -51,6 +51,8 @@ There is a [known issue](https://forums.docker.com/t/data-directory-var-lib-post
    docker volume create --name=pgdata
    ```
 
+Tested and working fine on Windows 10 with [PowerShell 7.0.3](https://github.com/PowerShell/PowerShell/releases/tag/v7.0.3) and [Docker Desktop 2.3.0.5 48029](https://www.docker.com/products/docker-desktop).
+
 ### Set up .env file
 ```bash
 cp .env.sample .env
