@@ -7,8 +7,8 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
 window.onload = function() {
     document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
         const table = th.closest('table');
-        Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+        Array.from(table.querySelectorAll('tbody > tr'))
             .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-            .forEach(tr => table.appendChild(tr) );
+            .forEach(tr => table.getElementsByTagName('tbody')[0].appendChild(tr) );
     })))
 };

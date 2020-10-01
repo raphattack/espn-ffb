@@ -1,53 +1,63 @@
 {%- extends "base.html" -%}
 {% block nav_standings %}active{% endblock %}
 {%- block content -%}
-  <form action="{{ url_for('standings.show', year=year) }}" method="get">
-    <label><input type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}>Regular Season</label>
-    <label><input type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}>Playoffs</label>
+  <form class="form-inline m-2" action="{{ url_for('standings.show', year=year) }}" method="get">
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" id="regularSeasonSelect" type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}></input>
+      <label class="form-check-label" for="regularSeasonSelect">Regular Season</label>
+    </div>
+    <div class="form-check form-check-inline">
+      <input class="form-check-input" id="playoffSelect" type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}></input>
+      <label class="form-check-label" for="playoffSelect">Playoffs</label>
+    </div>
   </form>
   {%- if records|length > 0 %}
-  <div class="stats-table">
-    <table>
-      <tr>
-        <th>Rank</th>
-        {%- for th in table_headers %}
-        <th>{{ th }}</th>
-        {%- endfor %}
-      </tr>
-      {%- set count = namespace(a=1) %}
-      {%- for r in records %}
-      <tr>
-        <td>{{ count.a }}</td>
-        {%- for cn in column_names %}
-        {%- if cn == "owner_id" %}
-        <td>{{ owner_id_to_name.get(r[cn]) }}</td>
-        {%- elif cn == "win_percentage" %}
-        <td>{{ r[cn] | percentage_format }}</td>
-        {%- elif cn == "points_for" or cn == "points_against" %}
-        <td>{{ r[cn] | points_format }}</td>
-        {%- elif cn == "championships" %}
-        <td>
-          {%- for c in range(0, r[cn]) %}
-          <img height=60 src="{{ url_for('static', filename='images/trophy.png') }}"/>
+  <div class="table-responsive">
+    <table id="standings" class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          {%- for th in table_headers %}
+          <th>{{ th }}</th>
           {%- endfor %}
-        </td>
-        {%- elif cn == "sackos" %}
-        <td>
-          {%- for d in range(0, r[cn]) -%}
-          {%- if r['owner_id'] == sacko['owner_id'] %}
-          <img height=60 src="{{ url_for('static', filename='images/sacko-current.png') }}"/>
+        </tr>
+      </thead>
+      <tbody>
+        {%- set count = namespace(a=1) %}
+        {%- for r in records %}
+        <tr>
+          <td>{{ count.a }}</td>
+          {%- for cn in column_names %}
+          {%- if cn == "owner_id" %}
+          <td>{{ owner_id_to_name.get(r[cn]) }}</td>
+          {%- elif cn == "win_percentage" %}
+          <td>{{ r[cn] | percentage_format }}</td>
+          {%- elif cn == "points_for" or cn == "points_against" %}
+          <td>{{ r[cn] | points_format }}</td>
+          {%- elif cn == "championships" %}
+          <td>
+            {%- for c in range(0, r[cn]) %}
+            <img height=60 src="{{ url_for('static', filename='images/trophy.png') }}"/>
+            {%- endfor %}
+          </td>
+          {%- elif cn == "sackos" %}
+          <td>
+            {%- for d in range(0, r[cn]) -%}
+            {%- if r['owner_id'] == sacko['owner_id'] %}
+            <img height=60 src="{{ url_for('static', filename='images/sacko-current.png') }}"/>
+            {%- else %}
+            <img height=60 src="{{ url_for('static', filename='images/sacko.png') }}"/>
+            {%- endif %}
+            {%- endfor %}
+          </td>
           {%- else %}
-          <img height=60 src="{{ url_for('static', filename='images/sacko.png') }}"/>
+          <td>{{ r[cn] }}</td>
           {%- endif %}
           {%- endfor %}
-        </td>
-        {%- else %}
-        <td>{{ r[cn] }}</td>
-        {%- endif %}
+        </tr>
+        {%- set count.a = count.a + 1 %}
         {%- endfor %}
-      </tr>
-      {%- set count.a = count.a + 1 %}
-      {%- endfor %}
+      </tbody>
     </table>
   </div>
   {%- endif %}

@@ -1,54 +1,57 @@
 {%- extends "base.html" -%}
 {% block nav_matchups %}active{% endblock %}
 {%- block content -%}
-  <form action="{{ url_for('matchup_history.show') }}" method="get">
-    <label>
-      Owner:
-      <select name="owner_id" onchange="this.form.submit()">
-        {%- for o in owners %}
-          {%- if o.owner_id != selected_opponent %}
-        <option value="{{ o.id }}" {%- if o.id == selected_owner %} selected {% endif %}>{{ o.first_name + " " + o.last_name }}</option>
-          {%- endif -%}
-        {%- endfor %}
-      </select>
-    </label>
-    <br><br>
-    <label>
-      Opponent:
-      <select name="opponent_owner_id" onchange="this.form.submit()">
-        {%- for o in owners %}
-          {%- if o.owner_id != selected_owner %}
-        <option value="{{ o.id }}" {%- if o.id == selected_opponent %} selected {% endif %}>{{ o.first_name + " " + o.last_name }}</option>
-          {%- endif -%}
-        {%- endfor %}
-      </select>
-    </label>
-    <label><input type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}>Regular Season</label>
-    <label><input type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}>Playoffs</label>
+  <form class="form-inline" action="{{ url_for('matchup_history.show') }}" method="get">
+    <label class="m-2" for="owner_id">Owner:</label>
+    <select class="custom-select m-2" name="owner_id" onchange="this.form.submit()">
+    {%- for o in owners %}
+      <option value="{{ o.id }}" {%- if o.id == selected_owner %} selected {% endif %}>{{o.first_name + " " + o.last_name }}</option>
+    {%- endfor %}
+    </select>
+    <label class="m-2" for="opponent_owner_id">Opponent:</label>
+    <select class="custom-select m-2" name="opponent_owner_id" onchange="this.form.submit()">
+    {%- for o in owners %}
+      {%- if o.owner_id != selected_owner %}
+      <option value="{{ o.id }}" {%- if o.id == selected_opponent %} selected {% endif %}>{{ o.first_name + " " + o.last_name }}</option>
+        {%- endif -%}
+      {%- endfor %}
+    </select>
+    <div class="form-check form-check-inline m-2">
+      <input class="form-check-input" id="regularSeasonSelect" type="radio" name="matchup_type" value="regular" onclick="this.form.submit()" {%- if matchup_type == "regular" %} checked {% endif %}></input>
+      <label class="form-check-label" for="regularSeasonSelect">Regular Season</label>
+    </div>
+    <div class="form-check form-check-inline m-2">
+      <input class="form-check-input" id="playoffSelect" type="radio" name="matchup_type" value="playoffs" onclick="this.form.submit()"{%- if matchup_type == "playoffs" %} checked {% endif %}></input>
+      <label class="form-check-label" for="playoffSelect">Playoffs</label>
+    </div>
   </form>
   {%- if records|length > 0 %}
-  <div class="stats-table">
-    <table>
-      <tr>
-        {%- for th in table_headers %}
-        <th>{{ th }}</th>
-        {%- endfor %}
-      </tr>
-      {%- for r in records %}
-      <tr>
-        {%- for cn in column_names %}
-        {%- if cn == "is_win" %}
-          {%- if r[cn] %}
-        <td>W</td>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered table-hover">
+      <thead>
+        <tr>
+          {%- for th in table_headers %}
+          <th>{{ th }}</th>
+          {%- endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {%- for r in records %}
+        <tr>
+          {%- for cn in column_names %}
+          {%- if cn == "is_win" %}
+            {%- if r[cn] %}
+          <td>W</td>
+            {%- else %}
+           <td>L</td>
+            {%- endif %}
           {%- else %}
-         <td>L</td>
+          <td>{{ r[cn] }}</td>
           {%- endif %}
-        {%- else %}
-        <td>{{ r[cn] }}</td>
-        {%- endif %}
+          {%- endfor %}
+        </tr>
         {%- endfor %}
-      </tr>
-      {%- endfor %}
+      </tbody>
     </table>
   </div>
   {%- endif %}
