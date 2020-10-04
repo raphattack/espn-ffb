@@ -14,6 +14,7 @@
           {{ r.opponent }} ({{ r.opponent_record.wins }}-{{ r.opponent_record.losses }})
         </h2>
         <h5>All-time: ({{ r.h2h_record.wins }}-{{ r.h2h_record.losses }}), Win streak: {{ r.streak }} ({{ r.streak_owner }})</h5>
+        <br>
         {%- include r.body %}
       </div>
       {%- endfor %}

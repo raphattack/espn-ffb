@@ -9,8 +9,8 @@ I have only tested with Postgres and the Docker image will also only work with P
 #### Sample views:
 - Recap - [desktop](sample/images/recap-desktop.png), [mobile](sample/images/recap-mobile.png)
 - Standings - [desktop](sample/images/standings.png)
-- Head-to-head records - [mobile](sample/images/h2h-records.png)
-- Matchup history - [mobile](sample/images/matchup-history.png)
+- Head-to-head records - [mobile](sample/images/h2h-records-desktop.png)
+- Matchup history - [mobile](sample/images/matchup-history-desktop.png)
 - Playoffs - [desktop](sample/images/playoffs.png)
 
 # Setup
@@ -136,4 +136,4 @@ python3 -m espn_ffb.scripts.generate_recap -e {dev|prod} -y {year} -w {week}
 # Contributors
 
 * [yorch](https://github.com/yorch) - Thank you for the Docker support!
-* [smfarrelly](https://github.com/smfarrelly) - Thank you for your help with converting the raw SQL to ORM!
+* [smfarrelly](https://github.com/smfarrelly) - Thank you for converting the raw SQL to ORM and for the UI redesign!
