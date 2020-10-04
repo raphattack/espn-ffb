@@ -136,4 +136,4 @@ python3 -m espn_ffb.scripts.generate_recap -e {dev|prod} -y {year} -w {week}
 # Contributors
 
 * [yorch](https://github.com/yorch) - Thank you for the Docker support!
-* [smfarrelly](https://github.com/smfarrelly) - Thank you for your help with converting the raw SQL to ORM!
+* [smfarrelly](https://github.com/smfarrelly) - Thank you for converting the raw SQL to ORM and for the UI redesign!
