@@ -9,8 +9,8 @@ I have only tested with Postgres and the Docker image will also only work with P
 #### Sample views:
 - Recap - [desktop](sample/images/recap-desktop.png), [mobile](sample/images/recap-mobile.png)
 - Standings - [desktop](sample/images/standings.png)
-- Head-to-head records - [mobile](sample/images/h2h-records.png)
-- Matchup history - [mobile](sample/images/matchup-history.png)
+- Head-to-head records - [mobile](sample/images/h2h-records-desktop.png)
+- Matchup history - [mobile](sample/images/matchup-history-desktop.png)
 - Playoffs - [desktop](sample/images/playoffs.png)
 
 # Setup
