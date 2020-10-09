@@ -65,13 +65,13 @@ Edit `.env` and replace `POSTGRES_PASSWORD` with your preferred password.
 docker-compose up -d
 ```
 
-Open browser to http://localhost:5000.
-
 ### Set up database
 To set up the database the first time, you can run the following command:
 ```bash
 docker-compose exec espn-ffb sh setup.sh
 ```
+
+Open browser to http://localhost:5000.
 
 ### Update
 ```bash
